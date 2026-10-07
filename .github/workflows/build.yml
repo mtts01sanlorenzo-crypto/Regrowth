@@ -20,6 +20,21 @@ jobs:
         if: always()
         run: |
           for f in $(find ~/.gradle/caches -name '*.jar' -path '*loom*' -size +10M 2>/dev/null | head -20); do unzip -l "$f" 2>/dev/null | awk '{print $4}' | grep -E '/(Villager|VillagerProfession|VillagerData|IronGolem|AbstractHorse|Animal|Bat|FarmBlock|FarmlandBlock|Brain|PoiManager|PoiRecord|PoiTypes|MemoryModuleType|BlockEntity)\.class$' | sed "s|^|$(basename $f): |"; done
+      - name: api dump
+        if: always()
+        run: |
+          J=$(find ~/.gradle/caches -name 'minecraft-merged-deobf-26.3.jar' | head -1)
+          { javap -cp $J net.minecraft.world.level.block.BonemealableBlock
+            javap -cp $J net.minecraft.sounds.SoundEvents | grep -E ' COW_'
+            javap -cp $J net.minecraft.server.level.ServerLevel | grep -iE 'getEntities|getDayTime|Time|Clock|getEntity|EntityGetter|getRandom'
+            javap -cp $J net.minecraft.world.level.Level | grep -iE 'DayTime|Time|Clock|getEntities|getRandom'
+            javap -cp $J net.minecraft.world.entity.ai.village.poi.PoiRecord
+            javap -cp $J net.minecraft.world.entity.npc.villager.Villager | grep -iE 'VillagerData|getVillager'
+            javap -cp $J net.minecraft.world.entity.npc.villager.VillagerData
+            javap -cp $J net.minecraft.world.entity.EntityType | grep -iE 'tryCast|spawn |spawn\(|getKey'
+            javap -cp $J net.minecraft.world.entity.Mob | grep -iE 'setBaby|setPersistence'
+            javap -cp $J net.minecraft.world.level.block.MushroomBlock | grep -i grow
+          } 2>&1 | sed 's/^/API: /'
       - uses: actions/upload-artifact@v7
         if: success()
         with:

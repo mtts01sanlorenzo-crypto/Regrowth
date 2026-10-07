@@ -168,7 +168,7 @@ public class Utility {
 			int modifier, boolean persistant, boolean isBaby) {
 		int numZP;
 		Mob e;
-		numZP = level.random.nextInt(range) - modifier;
+		numZP = level.getRandom().nextInt(range) - modifier;
 		if (numZP < 0)
 			return false;
 		for (int i = 0; i <= numZP; i++) {

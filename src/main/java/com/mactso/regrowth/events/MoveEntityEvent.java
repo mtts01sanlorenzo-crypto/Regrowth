@@ -42,10 +42,10 @@ import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.animal.golem.IronGolem;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -58,7 +58,7 @@ import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.CactusBlock;
 import net.minecraft.world.level.block.CoralBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
-import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.FarmlandBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.FlowerBlock;
@@ -211,7 +211,7 @@ public class MoveEntityEvent {
 		if (isHorseTypeEatingNow(le)) {
 			regrowthEventOdds *= 20;
 		}
-		double randomD100Roll = serverLevel.random.nextDouble();
+		double randomD100Roll = serverLevel.getRandom().nextDouble();
 		int debugvalue = 0; // TODO make sure value 0 after debugging.
 
 		long chunkAge = serverLevel.getChunkAt(le.blockPosition()).getInhabitedTime();
@@ -297,7 +297,7 @@ public class MoveEntityEvent {
 		}
 
 		if (regrowthType.equals(ACTION_BOTH)) {
-			if (serverLevel.random.nextDouble() * 100 > 85.0) {
+			if (serverLevel.getRandom().nextDouble() * 100 > 85.0) {
 				regrowthType = ACTION_GROW;
 			} else {
 				regrowthType = ACTION_EAT;
@@ -735,7 +735,7 @@ public class MoveEntityEvent {
 		sapling = Blocks.OAK_SAPLING.defaultBlockState();
 
 		ResourceKey<Biome> k = serverLevel.getBiomeManager().getBiome(pos).unwrapKey().get();
-		String biomeName = k.location().getPath();
+		String biomeName = k.identifier().getPath();
 
 		if (biomeName.contains("birch")) {
 			sapling = Blocks.BIRCH_SAPLING.defaultBlockState();
@@ -1322,7 +1322,7 @@ public class MoveEntityEvent {
 			Block theBlock = null;
 			Block theCapBlock = null;
 
-			if (serverLevel.random.nextDouble() * 100.0 > 75.0) {
+			if (serverLevel.getRandom().nextDouble() * 100.0 > 75.0) {
 				theBlock = Blocks.RED_MUSHROOM;
 				theCapBlock = Blocks.RED_MUSHROOM_BLOCK;
 			} else {
@@ -1341,9 +1341,9 @@ public class MoveEntityEvent {
 			} else {
 			try {
 					serverLevel.setBlockAndUpdate(lePos.below(),Blocks.DIRT.defaultBlockState());
-					mb.growMushroom(serverLevel, lePos, theBlock.defaultBlockState(), serverLevel.random);
+					mb.growMushroom(serverLevel, lePos, theBlock.defaultBlockState(), serverLevel.getRandom());
 					if (serverLevel.getBlockState(lePos).getBlock() == theBlock) {
-						mb.growMushroom(serverLevel, lePos, theBlock.defaultBlockState(), serverLevel.random);
+						mb.growMushroom(serverLevel, lePos, theBlock.defaultBlockState(), serverLevel.getRandom());
 					}
 					if (serverLevel.getBlockState(lePos).getBlock() == theBlock) {
 						serverLevel.setBlockAndUpdate(lePos, Blocks.AIR.defaultBlockState());
@@ -1436,7 +1436,7 @@ public class MoveEntityEvent {
 			if (!Utility.getResourceLocationString(footBlock).contains("byg")) { // byg grass crashes when bonemealed.
 				try {
 					BonemealableBlock ib = (BonemealableBlock) footBlock;
-					ib.performBonemeal(serverLevel, serverLevel.random, ePos, serverLevel.getBlockState(ePos));
+					ib.performBonemeal(serverLevel, serverLevel.getRandom(), ePos, serverLevel.getBlockState(ePos));
 					if (doDebug)
 					Utility.debugMsg(2, ePos, key + " grew and hid in tall plant.");
 					return false;
@@ -1484,7 +1484,7 @@ public class MoveEntityEvent {
 		// only try to plant saplings in about 1/4th of blocks.
 		double sinY = Math.sin((double) ((ePos.getY() + 64) % 256) / 256);
 
-		if (serverLevel.random.nextDouble() > Math.abs(sinY))
+		if (serverLevel.getRandom().nextDouble() > Math.abs(sinY))
 			return false;
 
 		BlockState sapling = null;
@@ -1686,8 +1686,8 @@ public class MoveEntityEvent {
 	    for (int i = 0; i < 4; i++) {
 	        mpos.set(pos.getX() + dx[i], pos.getY(), pos.getZ() + dz[i]);
 	        Block theBlock = level.getBlockState(mpos).getBlock();
-	        if (theBlock instanceof FarmBlock) {
-		        if (level.getBlockState(mpos).getValue(FarmBlock.MOISTURE) > 1) {
+	        if (theBlock instanceof FarmlandBlock) {
+		        if (level.getBlockState(mpos).getValue(FarmlandBlock.MOISTURE) > 1) {
 				return true;
 			}
 
@@ -1759,7 +1759,7 @@ public class MoveEntityEvent {
 		homeFenceDiameter = (homeFenceDiameter / 2) - 1;
 
 		Collection<PoiRecord> result = serverLevel.getPoiManager()
-				.getInSquare(t -> t == PoiTypes.HOME, vePos, 17, Occupancy.ANY)
+				.getInSquare(t -> t.is(PoiTypes.HOME), vePos, 17, Occupancy.ANY)
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		// 08/30/20 Collection had bug with range that I couldn't resolve.
