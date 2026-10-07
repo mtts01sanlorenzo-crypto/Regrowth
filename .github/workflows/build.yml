@@ -10,7 +10,12 @@ jobs:
           java-version: '25'
           distribution: 'microsoft'
       - run: chmod +x ./gradlew
-      - run: ./gradlew build --stacktrace
+      - name: build
+        run: ./gradlew build --stacktrace --console=plain 2>&1 | grep -E "error:|warning: \[|symbol:|location:|BUILD|FAILED|What went wrong" | head -150; exit ${PIPESTATUS[0]}
+      - name: where did classes move
+        if: always()
+        run: |
+          for f in $(find ~/.gradle/caches -name '*.jar' -path '*loom*' -size +10M 2>/dev/null | head -20); do unzip -l "$f" 2>/dev/null | awk '{print $4}' | grep -E '/(Villager|VillagerProfession|VillagerData|IronGolem|AbstractHorse|Animal|Bat|FarmBlock|FarmlandBlock|Brain|PoiManager|PoiRecord|PoiTypes|MemoryModuleType|BlockEntity)\.class$' | sed "s|^|$(basename $f): |"; done
       - uses: actions/upload-artifact@v7
         if: success()
         with:
