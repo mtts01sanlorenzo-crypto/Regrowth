@@ -22,7 +22,7 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -86,11 +86,6 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-
-@Mod.EventBusSubscriber()
 public class MoveEntityEvent {
 
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
@@ -138,7 +133,7 @@ public class MoveEntityEvent {
 	private static int lastTorchY = 0;
 	private static int lastTorchZ = 0;
 
-	private static final ResourceLocation BEEKEEPER = ResourceLocation.parse("bk:beekeeper");
+	private static final Identifier BEEKEEPER = Identifier.parse("bk:beekeeper");
 
 	private static boolean doDebug = false;
 	private static BlockState footBlockState;
@@ -153,10 +148,10 @@ public class MoveEntityEvent {
 	private static String biomeCategory;
 	static BlockPos adjustedPos;
 
-	@SubscribeEvent // is in Forge 
-	public static void handleEntityMoveEvents(LivingTickEvent event) {
+	// called from LivingEntityMixin at the start of every LivingEntity tick.
+	public static void handleEntityMoveEvents(LivingEntity le) {
 		Utility.debugMsg(1, "enter LivingEntity movement event handler");
-		if (event.getEntity() instanceof LivingEntity le) {
+		{
 			
 		Level level = le.level();
 		if (level.isClientSide()) {

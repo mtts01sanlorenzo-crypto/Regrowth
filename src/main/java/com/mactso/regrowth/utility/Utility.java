@@ -8,6 +8,7 @@ import com.mactso.regrowth.config.MyConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
@@ -234,14 +235,12 @@ public class Utility {
 		}
 
 
-	@SuppressWarnings("deprecation")
 	public static String getResourceLocationString(Block block) {
-		return block.builtInRegistryHolder().key().location().toString();
+		return BuiltInRegistries.BLOCK.getKey(block).toString();
 	}
 
-	@SuppressWarnings("deprecation")
 	public static String getResourceLocationString(Item item) {
-		return item.builtInRegistryHolder().key().location().toString();
+		return BuiltInRegistries.ITEM.getKey(item).toString();
 	}
 
 	public static String getResourceLocationString(Entity entity) {

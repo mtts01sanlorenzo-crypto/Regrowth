@@ -6,8 +6,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 
 public class RegrowthEntitiesManager {
 	public static Hashtable<String, RegrowthMobItem> regrowthMobHashtable = new Hashtable<>();
@@ -73,7 +73,7 @@ public class RegrowthEntitiesManager {
 
 				regrowthMobHashtable.put(key, new RegrowthMobItem(regrowthType, seconds));
 				if (!modAndEntity.contentEquals("hbm:default") &&
-				    !ForgeRegistries.ENTITY_TYPES.containsKey(ResourceLocation.parse(modAndEntity))
+				    !BuiltInRegistries.ENTITY_TYPE.containsKey(Identifier.parse(modAndEntity))
 				   )  {
 					System.out.println("Regrowth Debug: Mob: " + modAndEntity + " not in Forge Entity Type Registry.  Mispelled?");
 				}

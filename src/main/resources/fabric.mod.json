@@ -1,0 +1,25 @@
+{
+	"schemaVersion": 1,
+	"id": "regrowth",
+	"version": "${version}",
+	"name": "Regrowth",
+	"description": "Adds more life to your world. Villagers cut grass and improve their villages, animals eat and regrow plants as they wander. Fabric 26.3 port.",
+	"authors": ["MacTso", "Lupicus"],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/regrowth",
+		"sources": "https://github.com/mactso/Regrowth"
+	},
+	"license": "MIT",
+	"icon": "Regrowth.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["com.mactso.regrowth.Main"]
+	},
+	"mixins": ["regrowth.mixins.json"],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

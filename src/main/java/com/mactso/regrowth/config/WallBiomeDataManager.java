@@ -11,12 +11,11 @@ import org.jetbrains.annotations.NotNull;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet.Named;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class WallBiomeDataManager {
 	private static Hashtable<String, WallBiomeDataItem> wallBiomeDataHashtable = new Hashtable<>();
@@ -118,41 +117,27 @@ public class WallBiomeDataManager {
 				int wallDiameter = validatedWallDiameter(Integer.parseInt(wallDiameterString.trim()));
 
 				BlockState wallBlockState = DEFAULT_WALL_BLOCKSTATE;
-				if (ForgeRegistries.BLOCKS.containsKey( ResourceLocation.parse(wallBlockString))) {
+				if (BuiltInRegistries.BLOCK.containsKey(Identifier.parse(wallBlockString))) {
 					@NotNull
-					Optional<Holder<Block>> opt = ForgeRegistries.BLOCKS
-							.getHolder(ResourceLocation.parse(wallBlockString));
+					Optional<Holder<Block>> opt = BuiltInRegistries.BLOCK
+							.get(Identifier.parse(wallBlockString)).map(h -> (Holder<Block>) h);
 					if (opt.isPresent()) {
-							wallBlockState = opt.get().get().defaultBlockState();
+							wallBlockState = opt.get().value().defaultBlockState();
 						} 
 					}
 
 				BlockState fenceBlockState = DEFAULT_FENCE_BLOCKSTATE;
-				if (ForgeRegistries.BLOCKS.containsKey(ResourceLocation.parse(wallBlockString))) {
+				if (BuiltInRegistries.BLOCK.containsKey(Identifier.parse(fenceBlockString))) {
 					@NotNull
-					Optional<Holder<Block>> opt = ForgeRegistries.BLOCKS
-							.getHolder(ResourceLocation.parse(fenceBlockString));
+					Optional<Holder<Block>> opt = BuiltInRegistries.BLOCK
+							.get(Identifier.parse(fenceBlockString)).map(h -> (Holder<Block>) h);
 					if (opt.isPresent()) {
-							fenceBlockState = opt.get().get().defaultBlockState();
+							fenceBlockState = opt.get().value().defaultBlockState();
 					}
 				}
 
 				wallBiomeDataHashtable.put(key, new WallBiomeDataItem(wallDiameter, wallBlockState, fenceBlockState));
 				
-				if (!ForgeRegistries.BIOMES.isEmpty()  ) {
-					int break3 = 4;
-				}
-				// odd bug: can't see extreme hills, mesa, or nether here but can elsewhere.
-				if (    !ForgeRegistries.BIOMES.isEmpty()    
-						&& !modAndBiome.contentEquals("Regrowth:default") && !modAndBiome.contentEquals("Regrowth:minimum")
-						&& !modAndBiome.contentEquals("minecraft:icy") // TODO: Hack...
-						&& !modAndBiome.contentEquals("minecraft:extreme_hills") // TODO: Hack...
-						&& !modAndBiome.contentEquals("minecraft:mesa") // TODO: Hack... aka badlands
-						&& !modAndBiome.contentEquals("minecraft:nether") // TODO: Hack... aks the_nether
-						&& !ForgeRegistries.BIOMES.containsKey(ResourceLocation.parse(modAndBiome))) {
-					System.out.println("Regrowth Debug: Wall Biome Data: " + key
-							+ " not in Forge Biome Type Registry.  Mispelled?");
-				}
 			} catch (Exception e) {
 				System.out.println("Regrowth Debug:  Bad Wall Biome Data Config : " + MyConfig.defaultWallBiomeData[i]);
 			}

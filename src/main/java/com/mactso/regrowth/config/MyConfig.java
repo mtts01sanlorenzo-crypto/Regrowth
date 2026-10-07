@@ -1,41 +1,78 @@
-// 15.2 - 1.0.0.0 regrowth
+// Fabric 26.3 port: simple properties-file config replacing Forge's ForgeConfigSpec.
 package com.mactso.regrowth.config;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Properties;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.mactso.regrowth.Main;
-
-import net.minecraft.resources.ResourceLocation;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
-import net.minecraftforge.common.ForgeConfigSpec.IntValue;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 
-@Mod.EventBusSubscriber(modid = Main.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class MyConfig {
 
-	public static final Common COMMON;
-	public static final ForgeConfigSpec COMMON_SPEC;
-	
 	public static boolean CANCEL_EVENT = true;
 	public static boolean CONTINUE_EVENT = false;
-	
+
 	public static boolean tagsInitialized = false;
 
-	static {
-		final Pair<Common, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Common::new);
-		COMMON_SPEC = specPair.getRight();
-		COMMON = specPair.getLeft();
-	}
+	// ---- defaults ----
+	// mod:mob,type(eat,cut,grow,both,tall,villagerflags),Seconds;
+	private static final String DEFAULT_REGROWTH_MOBS = "minecraft:cow,both,300.0;" + "minecraft:horse,eat,180.0;"
+			+ "minecraft:donkey,eat,180.0;" + "minecraft:sheep,eat,120.0;" + "minecraft:pig,reforest,450.0;"
+			+ "minecraft:bee,grow,500.0;" + "minecraft:chicken,grow,320.0;" + "minecraft:villager,chrwvt,2.0;"
+			+ "minecraft:creeper,tall,90.0;" + "minecraft:zombie,stumble, 30.0;" + "minecraft:bat,stumble, 30.0;"
+			+ "minecraft:skeleton,mushroom, 40.0;" + "minecraft:tropical_fish,coral, 15.0;"
+			+ "minecraft:squid,coral, 15.0;";
+
+	// blocks walls can be built on
+	private static final String DEFAULT_WALL_FOUNDATIONS = "minecraft:grass_block;minecraft:sand;minecraft:red_sand;"
+			+ "minecraft:netherrack;minecraft:sandstone;minecraft:podzol;minecraft:dirt;minecraft:stone;"
+			+ "minecraft:coarse_dirt";
+
+	// biome to get biome category, wall size, wall block type
+	private static final String DEFAULT_BIOME_WALL_DATA = "Regrowth:default,40,minecraft:cobblestone_wall,minecraft:oak_fence;"
+			+ "minecraft:plains,40,minecraft:cobblestone_wall,minecraft:oak_fence;"
+			+ "minecraft:desert,40,minecraft:sandstone_wall,minecraft:birch_fence;"
+			+ "minecraft:extreme_hills,40,minecraft:cobblestone_wall,minecraft:spruce_fence;"
+			+ "minecraft:taiga,40,minecraft:mossy_cobblestone_wall,minecraft:spruce_fence;"
+			+ "minecraft:savanna,40,minecraft:stone_brick_wall,minecraft:acacia_fence;"
+			+ "minecraft:icy,40,minecraft:diorite_wall,minecraft:spruce_fence;"
+			+ "minecraft:the_end,40,minecraft:end_stone_brick_wall,minecraft:birch_fence;"
+			+ "minecraft:beach,40,minecraft:sandstone_wall,minecraft:oak_fence;"
+			+ "minecraft:forest,40,minecraft:mossy_stone_brick_wall,minecraft:oak_fence;"
+			+ "minecraft:mesa,40,minecraft:red_sandstone_wall,minecraft:oak_fence;"
+			+ "minecraft:jungle,40,minecraft:granite_wall,minecraft:jungle_fence;"
+			+ "minecraft:river,40,minecraft:mossy_cobblestone_wall,minecraft:oak_fence;"
+			+ "minecraft:nether,40,minecraft:blackstone_wall,minecraft:nether_brick_fence;"
+			+ "Regrowth:minimum,32,regrowth:minimum_wall_size,regrowth:fence_placeholder";
+
+	// ---- live values ----
+	private static int debugLevel = 0;
+	public static double eatingHealsOdds = 0.99;
+	public static Block playerWallControlBlock = Blocks.COBBLESTONE_WALL;
+	public static Block torchBlock = Blocks.TORCH;
+
+	public static String[] defaultRegrowthMobs;
+	public static String defaultRegrowthMobs6464 = DEFAULT_REGROWTH_MOBS;
+	public static String[] defaultWallFoundationsArray = DEFAULT_WALL_FOUNDATIONS.split(";");
+	public static String[] defaultWallBiomeData;
+	public static String defaultWallBiomeData6464 = DEFAULT_BIOME_WALL_DATA;
+
+	private static int torchLightLevel = 3;
+	private static int mushroomDensity = 7;
+	private static int mushroomXDensity = 6;
+	private static int mushroomZDensity = 6;
+	private static double mushroomMinTemp = 0.2;
+	private static double mushroomMaxTemp = 1.2;
+
+	private static String playerWallControlBlockString = "minecraft:cobblestone_wall";
+	private static String torchBlockString = "minecraft:torch";
 
 	public static int getaDebugLevel() {
 		return debugLevel;
@@ -44,7 +81,7 @@ public class MyConfig {
 	public static int getDebugLevel() {
 		return debugLevel;
 	}
-	
+
 	public static void setaDebugLevel(int debugLevel) {
 		MyConfig.debugLevel = debugLevel;
 	}
@@ -77,7 +114,6 @@ public class MyConfig {
 		MyConfig.torchBlock = torchBlock;
 	}
 
-	
 	public static int getMushroomDensity() {
 		return MyConfig.mushroomDensity;
 	}
@@ -97,227 +133,121 @@ public class MyConfig {
 	public static double getMushroomMaxTemp() {
 		return MyConfig.mushroomMaxTemp;
 	}
-	
+
 	public static int getTorchLightLevel() {
 		return torchLightLevel;
 	}
-	
-	private static int debugLevel;
-	public static double eatingHealsOdds;
-	public static Block playerWallControlBlock;
-	public static Block torchBlock;
-	
-	public static String[] defaultRegrowthMobs;
-	public static String defaultRegrowthMobs6464;
-	public static String[]  defaultWallFoundationsArray;
-//	public static String[] defaultWallFoundations;
-//	public static String defaultWallFoundations6464;
-	public static String[] defaultWallBiomeData;
-	public static String defaultWallBiomeData6464;
 
-	private static int torchLightLevel;
+	// ---- load / save ----
 
-	private static int mushroomDensity;
-	private static int mushroomXDensity;
-	private static int mushroomZDensity;
-	private static double mushroomMinTemp;
-	private static double mushroomMaxTemp;
-
-	@SubscribeEvent
-	public static void onModConfigEvent(final ModConfigEvent configEvent) {
-        if (configEvent instanceof ModConfigEvent.Unloading)
-            return;
-        
-		if (configEvent.getConfig().getSpec() == MyConfig.COMMON_SPEC) {
-            if (MyConfig.COMMON_SPEC.isLoaded()) {
-    			bakeConfig();
-    			RegrowthEntitiesManager.regrowthMobInit();
-    			WallFoundationDataManager.wallFoundationsInit();
-    			}
-            }
-	}
-	
-	
-	public static void pushDebugLevel() {
-		COMMON.debugLevel.set(debugLevel);
+	private static Path configPath() {
+		return FabricLoader.getInstance().getConfigDir().resolve("regrowth.properties");
 	}
 
-	public static void pushValues() {
-		COMMON.defaultRegrowthMobsActual.set(RegrowthEntitiesManager.getRegrowthHashAsString());
-//		COMMON.defaultWallFoundationsList.set(WallFoundationDataManager.getWallFoundationHashAsString());
-		COMMON.defaultBiomeWallDataActual.set(WallBiomeDataManager.getWallBiomeDataHashAsString());
-	}
+	public static void load() {
+		Properties p = new Properties();
+		Path path = configPath();
+		if (Files.exists(path)) {
+			try (Reader r = Files.newBufferedReader(path)) {
+				p.load(r);
+			} catch (IOException e) {
+				System.out.println("Regrowth: could not read config, using defaults: " + e);
+			}
+		}
 
-	// remember need to push each of these values separately once we have commands.
-	public static void bakeConfig() {
-		
-		debugLevel = COMMON.debugLevel.get();
-		eatingHealsOdds = COMMON.eatingHeals.get();
-		MyConfig.torchLightLevel = (int) MyConfig.COMMON.torchLightLevel.get();
-		MyConfig.mushroomDensity = (int) MyConfig.COMMON.mushroomDensity.get();
-		MyConfig.mushroomXDensity = (int) MyConfig.COMMON.mushroomXDensity.get();
-		MyConfig.mushroomZDensity = (int) MyConfig.COMMON.mushroomZDensity.get();
-		MyConfig.mushroomMinTemp = (double) MyConfig.COMMON.mushroomMinTemp.get();
-		MyConfig.mushroomMaxTemp = (double) MyConfig.COMMON.mushroomMaxTemp.get();
-		defaultRegrowthMobs6464 = COMMON.defaultRegrowthMobsActual.get();
-		defaultWallFoundationsArray = extract(COMMON.wallFoundationsList.get());
+		debugLevel = clamp(parseInt(p, "debugLevel", 0), 0, 2);
+		eatingHealsOdds = clamp(parseDouble(p, "eatingHeals", 0.99), 0.0, 1.0);
+		torchLightLevel = clamp(parseInt(p, "torchLightLevel", 3), 0, 10);
+		mushroomDensity = clamp(parseInt(p, "mushroomDensity", 7), 3, 21);
+		mushroomXDensity = clamp(parseInt(p, "mushroomXDensity", 6), 3, 11);
+		mushroomZDensity = clamp(parseInt(p, "mushroomZDensity", 6), 3, 11);
+		mushroomMinTemp = clamp(parseDouble(p, "mushroomMinTemp", 0.2), -2.0, 2.0);
+		mushroomMaxTemp = clamp(parseDouble(p, "mushroomMaxTemp", 1.2), -2.0, 2.0);
+		playerWallControlBlockString = p.getProperty("playerWallControlBlockString", "minecraft:cobblestone_wall").trim();
+		torchBlockString = p.getProperty("torchBlockString", "minecraft:torch").trim();
+		defaultRegrowthMobs6464 = p.getProperty("regrowthMobs", DEFAULT_REGROWTH_MOBS);
+		defaultWallFoundationsArray = p.getProperty("wallFoundations", DEFAULT_WALL_FOUNDATIONS).trim().split("\\s*;\\s*");
+		defaultWallBiomeData6464 = p.getProperty("biomeWallData", DEFAULT_BIOME_WALL_DATA);
+
+		resolveBlocks();
+		RegrowthEntitiesManager.regrowthMobInit();
 		WallFoundationDataManager.wallFoundationsInit();
-		defaultWallBiomeData6464 = COMMON.defaultBiomeWallDataActual.get();
-		try {
-			
-			ResourceLocation rl = ResourceLocation.parse(COMMON.playerWallControlBlockString.get());
-			playerWallControlBlock = ForgeRegistries.BLOCKS.getValue(rl);
-			ResourceLocation t1 = ResourceLocation.parse(COMMON.torchBlockString.get());
-			torchBlock = ForgeRegistries.BLOCKS.getValue(t1);
-		}
-		catch (Exception e) {
-			System.out.println("Regrowth Debug:  Player Wall Control Block Illegal Config (uPper CaSe?): " + COMMON.playerWallControlBlockString.get());
-		}
-		if (playerWallControlBlock == Blocks.AIR) {
-			System.out.println("Regrowth Warn:  Player Wall Control Block is : " + COMMON.playerWallControlBlockString.get());
-		}
 
+		if (!Files.exists(path)) {
+			save();
+		}
 		if (debugLevel > 0) {
 			System.out.println("Regrowth Debug Level: " + debugLevel);
 		}
 	}
 
-	private static String[] extract(List<? extends String> value)
-	{
-		return value.toArray(new String[value.size()]);
-	}
-	
-	public static class Common {
-
-		public final IntValue debugLevel;
-		public final DoubleValue eatingHeals;
-		public final IntValue torchLightLevel;
-		public final ForgeConfigSpec.IntValue mushroomDensity;
-		public final ForgeConfigSpec.IntValue mushroomXDensity;
-		public final ForgeConfigSpec.IntValue mushroomZDensity;
-		public final ForgeConfigSpec.DoubleValue mushroomMinTemp;
-		public final ForgeConfigSpec.DoubleValue mushroomMaxTemp;
-		public final ConfigValue<String> playerWallControlBlockString;		
-		public final ConfigValue<String>  torchBlockString;		
-		public final ConfigValue<List<? extends String>> wallFoundationsList;
-
-		
-		// mod:mob,type(eat,cut,grow,both,tall,villagerflags),Seconds;
-		public final ConfigValue<String> defaultRegrowthMobsActual;
-		public final String defaultRegrowthMobs6464 = "minecraft:cow,both,300.0;" + "minecraft:horse,eat,180.0;"
-				+ "minecraft:donkey,eat,180.0;" + "minecraft:sheep,eat,120.0;" + "minecraft:pig,reforest,450.0;"
-				+ "minecraft:bee,grow,500.0;" + "minecraft:chicken,grow,320.0;" + "minecraft:villager,chrwvt,2.0;"
-				+ "minecraft:creeper,tall,90.0;" + "minecraft:zombie,stumble, 30.0;" + "minecraft:bat,stumble, 30.0;"
-				+ "minecraft:skeleton,mushroom, 40.0;" + "minecraft:tropical_fish,coral, 15.0;"+ "minecraft:squid,coral, 15.0;";
-
-		// blocks walls can be built on
-		List<String> defaultWallFoundationsList = Arrays.asList(
-				"minecraft:grass_block",
-				"minecraft:sand",
-				"minecraft:red_sand",
-				"minecraft:netherrack",
-				"minecraft:sandstone",
-				"minecraft:podzol",
-				"minecraft:dirt",
-				"minecraft:stone",
-				"minecraft:coarse_dirt"
-		);	
-//		public final ConfigValue<String> defaultWallFoundationsActual;
-//		public final String defaultWallFoundations6464 = "minecraft:grass_block;" + "minecraft:sand;"
-//				+ "minecraft:red_sand;" + "minecraft:netherrack;" + "minecraft:sandstone;" + "minecraft:podzol;"
-//				+ "minecraft:dirt;" + "minecraft:stone;" + "minecraft:coarse_dirt";
-
-		// biome to get biome category, wall size, wall block type
-		public final ConfigValue<String> defaultBiomeWallDataActual;
-		public final String defaultBiomeWallData6464 = "Regrowth:default,40,minecraft:cobblestone_wall,minecraft:oak_fence;"
-				+ "minecraft:plains,40,minecraft:cobblestone_wall,minecraft:oak_fence;"
-				+ "minecraft:desert,40,minecraft:sandstone_wall,minecraft:birch_fence;"
-				+ "minecraft:extreme_hills,40,minecraft:cobblestone_wall,minecraft:spruce_fence;"
-				+ "minecraft:taiga,40,minecraft:mossy_cobblestone_wall,minecraft:spruce_fence;"
-				+ "minecraft:savanna,40,minecraft:stone_brick_wall,minecraft:acacia_fence;"
-				+ "minecraft:icy,40,minecraft:diorite_wall,minecraft:spruce_fence;"
-				+ "minecraft:the_end,40,minecraft:end_stone_brick_wall,minecraft:birch_fence;"
-				+ "minecraft:beach,40,minecraft:sandstone_wall,minecraft:oak_fence;"
-				+ "minecraft:forest,40,minecraft:mossy_stone_brick_wall,minecraft:oak_fence;"
-				+ "minecraft:mesa,40,minecraft:red_sandstone_wall,minecraft:oak_fence;"
-				+ "minecraft:jungle,40,minecraft:granite_wall,minecraft:jungle_fence;"
-				+ "minecraft:river,40,minecraft:mossy_cobblestone_wall,minecraft:oak_fence;"
-				+ "minecraft:nether,40,minecraft:blackstone_wall,minecraft:nether_brick_fence;"
-				+ "Regrowth:minimum,32,regrowth:minimum_wall_size,regrowth:fence_placeholder";
-
-		public Common(ForgeConfigSpec.Builder builder) {
-			builder.push("Regrowth Control Values");
-
-			debugLevel = builder.comment("Debug Level: 0 = Off, 1 = Log, 2 = Chat+Log")
-					.translation(Main.MODID + ".config." + "debugLevel").defineInRange("debugLevel", () -> 0, 0, 2);
-
-			eatingHeals = builder.comment("Eating Heals: 0-No, 1-yes")
-					.translation(Main.MODID + ".config." + "eatingHeals")
-					.defineInRange("eatingHeals", () -> .99, 0.0, 1.0);
-
-			this.torchLightLevel = builder.comment("Torch Light Level - Villagers will only place torches on blocks this dark or darker.")
-					.translation("regrowth.config.torchLightLevel ")
-					.defineInRange("torchLightLevel ", () -> 3, 0, 10);
-			
-			this.mushroomDensity = builder.comment("Mushroom density - 3 dense to 11 sparse to 21 very sparse")
-					.translation("regrowth.config.mushroomXDensity ")
-					.defineInRange("mushroomXDensity ", () -> 7, 3, 21);
-
-			this.mushroomXDensity = builder.comment("Mushroom X axis density - 3 dense to 11 sparse")
-					.translation("regrowth.config.mushroomXDensity ")
-					.defineInRange("mushroomXDensity ", () -> 6, 3, 11);
-			this.mushroomZDensity = builder.comment("Mushroom Z axis density - 3 dense to 11 sparse")
-					.translation("regrowth.config.mushroomZDensity ")
-					.defineInRange("mushroomZDensity ", () -> 6, 3, 11);
-			this.mushroomMinTemp = builder.comment("Mushroom Minimum Biome Temperature")
-					.translation("regrowth.config.mushroomMinTemp")
-					.defineInRange("mushroomMinTemp", () -> 0.2, -2.0, 2.0);
-			this.mushroomMaxTemp = builder.comment("Mushroom Maximum Biome Temperature")
-					.translation("regrowth.config.mushroomMaxTemp")
-					.defineInRange("mushroomMaxTemp", () -> 1.2, -2.0, 2.0);
-
-			this.playerWallControlBlockString = builder.comment("When block is over bell, villagers build walls. This block is created over bell when village is new.  If block is 'Air' players can't turn off wall building.")
-					.translation("regrowth.config.playerWallControlBlockString")
-					.define("playerWallControlBlockString", "minecraft:cobblestone_wall");
-
-			this.torchBlockString = builder.comment("This is the torch the villagers place.  It can be a modded torch.")
-					.translation("regrowth.config.torchBlockString")
-					.define("torchBlockString", "minecraft:torch");
-
-			builder.pop();
-
-			builder.push("Regrowth Mobs 6464");
-
-			defaultRegrowthMobsActual = builder.comment("RegrowthMobs String 6464")
-					.translation(Main.MODID + ".config" + "defaultRegrowthMobsActual")
-					.define("defaultRegrowthMobsActual", defaultRegrowthMobs6464);
-			builder.pop();
-
-			builder.push("Regrowth Wall Foundations");
-
-			wallFoundationsList = builder
-					.comment("Blocks villagers can build walls on .")
-					.translation(Main.MODID + ".config" + "wallFoundationsList")
-					.defineList("wallFoundationsList", defaultWallFoundationsList, Common::isString);
-			
-//			defaultWallFoundationsActual = builder.comment("WallFoundations String 6464")
-//					.translation(Main.MODID + ".config" + "defaultWallFoundationsActual")
-//					.define("defaultWallFoundationsActual", defaultWallFoundations6464);
-			builder.pop();
-
-			builder.push("Regrowth Biome Wall Data 6464");
-
-			defaultBiomeWallDataActual = builder.comment("Biome Meeting Wall Data String 6464")
-					.translation(Main.MODID + ".config" + "defaultBiomeWallDataActual")
-					.define("defaultBiomeWallDataActual", defaultBiomeWallData6464);
-			builder.pop();
-
-		}
-		
-		public static boolean isString(Object o)
-		{
-			return (o instanceof String);
+	public static void save() {
+		Path path = configPath();
+		try (Writer w = Files.newBufferedWriter(path)) {
+			w.write("# Regrowth config (Fabric 26.3 port)\n");
+			w.write("# Debug Level: 0 = Off, 1 = Log, 2 = Chat+Log\n");
+			w.write("debugLevel=" + debugLevel + "\n");
+			w.write("# Eating heals odds, 0.0 - 1.0\n");
+			w.write("eatingHeals=" + eatingHealsOdds + "\n");
+			w.write("# Villagers only place torches on blocks this dark or darker (0-10)\n");
+			w.write("torchLightLevel=" + torchLightLevel + "\n");
+			w.write("# Mushroom density: 3 dense to 21 very sparse\n");
+			w.write("mushroomDensity=" + mushroomDensity + "\n");
+			w.write("# Mushroom X / Z axis density: 3 dense to 11 sparse\n");
+			w.write("mushroomXDensity=" + mushroomXDensity + "\n");
+			w.write("mushroomZDensity=" + mushroomZDensity + "\n");
+			w.write("# Mushroom minimum / maximum biome temperature\n");
+			w.write("mushroomMinTemp=" + mushroomMinTemp + "\n");
+			w.write("mushroomMaxTemp=" + mushroomMaxTemp + "\n");
+			w.write("# Block placed over the bell; villagers build walls when it is present. 'minecraft:air' = players can't turn walls off\n");
+			w.write("playerWallControlBlockString=" + playerWallControlBlockString + "\n");
+			w.write("# Torch the villagers place (can be a modded torch)\n");
+			w.write("torchBlockString=" + torchBlockString + "\n");
+			w.write("# mod:mob,action,seconds;  actions: eat,cut,grow,both,tall,reforest,mushroom,stumble,coral + villager flags\n");
+			w.write("regrowthMobs=" + defaultRegrowthMobs6464 + "\n");
+			w.write("# Blocks villagers can build walls on, separated by ;\n");
+			w.write("wallFoundations=" + String.join(";", defaultWallFoundationsArray) + "\n");
+			w.write("# biome,wall size,wall block,fence block;\n");
+			w.write("biomeWallData=" + defaultWallBiomeData6464 + "\n");
+		} catch (IOException e) {
+			System.out.println("Regrowth: could not write config: " + e);
 		}
 	}
 
+	private static void resolveBlocks() {
+		try {
+			playerWallControlBlock = BuiltInRegistries.BLOCK.getValue(Identifier.parse(playerWallControlBlockString));
+			torchBlock = BuiltInRegistries.BLOCK.getValue(Identifier.parse(torchBlockString));
+		} catch (Exception e) {
+			System.out.println("Regrowth Debug:  Player Wall Control Block Illegal Config (uPper CaSe?): "
+					+ playerWallControlBlockString);
+		}
+		if (playerWallControlBlock == Blocks.AIR) {
+			System.out.println("Regrowth Warn:  Player Wall Control Block is : " + playerWallControlBlockString);
+		}
+	}
+
+	private static int parseInt(Properties p, String key, int def) {
+		try {
+			return Integer.parseInt(p.getProperty(key, String.valueOf(def)).trim());
+		} catch (NumberFormatException e) {
+			return def;
+		}
+	}
+
+	private static double parseDouble(Properties p, String key, double def) {
+		try {
+			return Double.parseDouble(p.getProperty(key, String.valueOf(def)).trim());
+		} catch (NumberFormatException e) {
+			return def;
+		}
+	}
+
+	private static int clamp(int v, int lo, int hi) {
+		return Math.max(lo, Math.min(hi, v));
+	}
+
+	private static double clamp(double v, double lo, double hi) {
+		return Math.max(lo, Math.min(hi, v));
+	}
 }

@@ -12,7 +12,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -28,7 +28,7 @@ public class RegrowthCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		System.out.println("Enter register");
 		dispatcher.register(Commands.literal("regrowth").requires((source) -> {
-				return source.hasPermission(2);
+				return Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(source);
 		}).then(Commands.literal("debugLevel")
 				.then(Commands.argument("debugLevel", IntegerArgumentType.integer(0, 2)).executes(ctx -> {
 					return setDebugLevel(IntegerArgumentType.getInteger(ctx, "debugLevel"));
@@ -42,7 +42,7 @@ public class RegrowthCommands {
 	                     } else {
 					    objectInfo = "You don't see an entity.";
 					}
-						ResourceLocation rl =serverLevel.dimension().location();
+						Identifier rl = serverLevel.dimension().identifier();
 
 					Utility.sendBoldChat(sp, "Regrowth " + rl.toString() + " Current Values", ChatFormatting.DARK_GREEN);
 

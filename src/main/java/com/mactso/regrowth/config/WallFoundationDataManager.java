@@ -2,8 +2,8 @@ package com.mactso.regrowth.config;
 
 import java.util.Hashtable;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 
 public class WallFoundationDataManager {
 
@@ -45,7 +45,7 @@ public class WallFoundationDataManager {
 			try {
 				String wallFoundationBlockKey = MyConfig.defaultWallFoundationsArray[i];
 				String key = wallFoundationBlockKey;				
-				if (ForgeRegistries.BLOCKS.containsKey(ResourceLocation.parse(wallFoundationBlockKey))) {
+				if (BuiltInRegistries.BLOCK.containsKey(Identifier.parse(wallFoundationBlockKey))) {
 					wallFoundationsHashtable.put(key, new wallFoundationItem(wallFoundationBlockKey));
 				} else {
 					System.out.println("Regrowth Debug: Wall Foundation Block: " + wallFoundationBlockKey + " not in Forge Entity Type Registry.  Mispelled?  Missing semicolon? ");
