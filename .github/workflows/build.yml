@@ -16,6 +16,11 @@ jobs:
           ./gradlew build --stacktrace --console=plain > build.log 2>&1 || RC=$?
           grep -E "error:|symbol:|location:|BUILD|FAILED|What went wrong" build.log | head -200
           exit ${RC:-0}
+      - name: block class check
+        run: |
+          J=$(find ~/.gradle/caches -name 'minecraft-merged-deobf-26.3.jar' | head -1)
+          javap -c -p -cp $J net.minecraft.world.level.block.Blocks > /tmp/blocks.txt
+          for n in short_grass tall_grass short_dry_grass tall_dry_grass leaf_litter fern; do echo "== $n"; grep -A8 "ldc.*String $n\b" /tmp/blocks.txt | grep -E "new|ldc" | head -4; done
       - name: server smoke test
         run: |
           mkdir -p run && echo eula=true > run/eula.txt
