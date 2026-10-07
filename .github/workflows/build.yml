@@ -16,22 +16,11 @@ jobs:
           ./gradlew build --stacktrace --console=plain > build.log 2>&1 || RC=$?
           grep -E "error:|symbol:|location:|BUILD|FAILED|What went wrong" build.log | head -200
           exit ${RC:-0}
-      - name: where did classes move
-        if: always()
+      - name: server smoke test
         run: |
-          for f in $(find ~/.gradle/caches -name '*.jar' -path '*loom*' -size +10M 2>/dev/null | head -20); do unzip -l "$f" 2>/dev/null | awk '{print $4}' | grep -E '/(Villager|VillagerProfession|VillagerData|IronGolem|AbstractHorse|Animal|Bat|FarmBlock|FarmlandBlock|Brain|PoiManager|PoiRecord|PoiTypes|MemoryModuleType|BlockEntity)\.class$' | sed "s|^|$(basename $f): |"; done
-      - name: api dump
-        if: always()
-        run: |
-          J=$(find ~/.gradle/caches -name 'minecraft-merged-deobf-26.3.jar' | head -1)
-          rm -rf /tmp/mc && mkdir /tmp/mc && (cd /tmp/mc && unzip -q $J 'net/minecraft/*')
-          { echo "IRON_GOLEM defined in: $(grep -rl IRON_GOLEM /tmp/mc | head -5)"
-            echo "COW_DEATH referenced in: $(grep -rl COW_DEATH /tmp/mc | head -5)"
-            echo "cow classes: $(ls /tmp/mc/net/minecraft/world/entity/animal/cow)"
-            javap -cp $J net.minecraft.world.entity.animal.cow.CowSoundVariant
-            javap -cp $J net.minecraft.world.entity.animal.cow.CowSoundVariants
-            javap -p -cp $J 'net.minecraft.world.entity.animal.cow.CowSoundVariants$SoundSet'
-          } 2>&1 | sed 's/^/API: /'
+          mkdir -p run && echo eula=true > run/eula.txt
+          (sleep 110; echo stop) | timeout 300 ./gradlew runServer --console=plain > server.log 2>&1 || true
+          grep -iE "regrowth|mixin|exception|error|Done \(|Loading Minecraft|Loader" server.log | head -80
       - uses: actions/upload-artifact@v7
         if: success()
         with:
