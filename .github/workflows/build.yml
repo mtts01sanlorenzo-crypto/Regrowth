@@ -11,7 +11,11 @@ jobs:
           distribution: 'microsoft'
       - run: chmod +x ./gradlew
       - name: build
-        run: ./gradlew build --stacktrace --console=plain 2>&1 | grep -E "error:|warning: \[|symbol:|location:|BUILD|FAILED|What went wrong" | head -150; exit ${PIPESTATUS[0]}
+        run: |
+          set -o pipefail
+          ./gradlew build --stacktrace --console=plain > build.log 2>&1 || RC=$?
+          grep -E "error:|symbol:|location:|BUILD|FAILED|What went wrong" build.log | head -200
+          exit ${RC:-0}
       - name: where did classes move
         if: always()
         run: |
