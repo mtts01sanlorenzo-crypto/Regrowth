@@ -16,16 +16,19 @@ jobs:
           ./gradlew build --stacktrace --console=plain > build.log 2>&1 || RC=$?
           grep -E "error:|symbol:|location:|BUILD|FAILED|What went wrong" build.log | head -200
           exit ${RC:-0}
-      - name: block class check
+      - name: gameplay test (villager on grass)
         run: |
-          J=$(find ~/.gradle/caches -name 'minecraft-merged-deobf-26.3.jar' | head -1)
-          javap -c -p -cp $J net.minecraft.world.level.block.Blocks > /tmp/blocks.txt
-          for n in short_grass tall_grass short_dry_grass tall_dry_grass leaf_litter fern; do echo "== $n"; grep -A8 "ldc.*String $n\b" /tmp/blocks.txt | grep -E "new|ldc" | head -4; done
-      - name: server smoke test
-        run: |
-          mkdir -p run && echo eula=true > run/eula.txt
-          (sleep 110; echo stop) | timeout 300 ./gradlew runServer --console=plain > server.log 2>&1 || true
-          grep -iE "regrowth|mixin|exception|error|Done \(|Loading Minecraft|Loader" server.log | head -80
+          mkdir -p run/config && echo eula=true > run/eula.txt && printf 'debugLevel=2\n' > run/config/regrowth.properties
+          ( sleep 50
+            echo "forceload add 0 0"; sleep 8
+            echo "setblock 0 120 0 minecraft:grass_block"
+            echo "setblock 0 121 0 minecraft:short_grass"
+            echo "summon minecraft:villager 0.5 121 0.5"
+            sleep 45
+            echo "data get entity @e[type=minecraft:villager,limit=1] Pos"
+            sleep 3
+            echo stop ) | timeout 300 ./gradlew runServer --console=plain > server.log 2>&1 || true
+          grep -iE "grass cut|regrowth|Reg-|L1|L2|exception|error|Villager|Pos" server.log | grep -v server.properties | head -60
       - uses: actions/upload-artifact@v7
         if: success()
         with:
