@@ -1535,14 +1535,8 @@ public class MoveEntityEvent {
 		BlockPos pos = BlockPos.containing(le.getX(), le.getY(), le.getZ());
 
 		AABB box = AABB.encapsulatingFullBlocks(pos.east(2).above(2).north(2), pos.west(2).below(2).south(2));
-		List<Entity> entityList = new ArrayList<>(); // TODO refactor "l" to "entityList"
-
 		EntityType<?> test = le.getType();
-		serverLevel.getEntities().get(box, (entity) -> {
-			if (test.tryCast(entity) != null) {
-				entityList.add(entity);
-			}
-		});
+		List<Entity> entityList = serverLevel.getEntities((Entity) null, box, entity -> test.tryCast(entity) != null);
 		if (entityList.size() >= 9) {
 			serverLevel.setBlockAndUpdate(pos.below(), Blocks.DIRT_PATH.defaultBlockState());
 			le.hurtServer(serverLevel, serverLevel.damageSources().inWall(), 0.25F);
@@ -1555,7 +1549,7 @@ public class MoveEntityEvent {
 		if (optRk.isEmpty()) {
 			return;
 		}
-	    String job = optRk.get().location().getPath().toString();
+	    String job = optRk.get().identifier().getPath().toString();
 		if (job != "beekeeper") {
 			return;
 		}
@@ -1587,7 +1581,7 @@ public class MoveEntityEvent {
 			return false;
 		}
 
-		long daytime = serverLevel.getDayTime() % 24000;
+		long daytime = serverLevel.getDefaultClockTime() % 24000;
 		if (daytime < 9000 || daytime > 11000) {
 			return false;
 		}
@@ -2153,26 +2147,26 @@ public class MoveEntityEvent {
 		int adjacentBlocks = 0;
 		// int debug = 1;
 		// Block b = sLevel.getBlockState(pos.below(2).east()).getBlock();
-		if (sLevel.getBlockState(pos.below(1).east()).getBlockHolder().is(BlockTags.AIR)
-				&& !sLevel.getBlockState(pos.below(2).east()).getBlockHolder().is(BlockTags.AIR)) {
+		if (sLevel.getBlockState(pos.below(1).east()).is(BlockTags.AIR)
+				&& !sLevel.getBlockState(pos.below(2).east()).is(BlockTags.AIR)) {
 			adjacentBlocks++;
 		}
 		
 		// b = sLevel.getBlockState(pos.below(2).west()).getBlock();
-		if (sLevel.getBlockState(pos.below(1).west()).getBlockHolder().is(BlockTags.AIR)
-				&& !sLevel.getBlockState(pos.below(2).west()).getBlockHolder().is(BlockTags.AIR)) {
+		if (sLevel.getBlockState(pos.below(1).west()).is(BlockTags.AIR)
+				&& !sLevel.getBlockState(pos.below(2).west()).is(BlockTags.AIR)) {
 			adjacentBlocks++;
 		}
 
 		// b= sLevel.getBlockState(pos.below(2).north()).getBlock();
-		if (sLevel.getBlockState(pos.below(1).north()).getBlockHolder().is(BlockTags.AIR)
-				&& !sLevel.getBlockState(pos.below(2).north()).getBlockHolder().is(BlockTags.AIR)) {
+		if (sLevel.getBlockState(pos.below(1).north()).is(BlockTags.AIR)
+				&& !sLevel.getBlockState(pos.below(2).north()).is(BlockTags.AIR)) {
 			adjacentBlocks++;
 		}
 
 		// b= sLevel.getBlockState(pos.below(2).south()).getBlock();
-		if (sLevel.getBlockState(pos.below(1).south()).getBlockHolder().is(BlockTags.AIR)
-				&& !sLevel.getBlockState(pos.below(2).south()).getBlockHolder().is(BlockTags.AIR)) {
+		if (sLevel.getBlockState(pos.below(1).south()).is(BlockTags.AIR)
+				&& !sLevel.getBlockState(pos.below(2).south()).is(BlockTags.AIR)) {
 			adjacentBlocks++;
 		}
 
@@ -2215,16 +2209,16 @@ public class MoveEntityEvent {
 
 	private static boolean isRoadPotHole(ServerLevel serverLevel, BlockPos pos) {
 		int count = 0;
-		if (!serverLevel.getBlockState(pos.east()).getBlockHolder().is(BlockTags.AIR)) {
+		if (!serverLevel.getBlockState(pos.east()).is(BlockTags.AIR)) {
 			count++;
 		}
-		if (!serverLevel.getBlockState(pos.west()).getBlockHolder().is(BlockTags.AIR)) {
+		if (!serverLevel.getBlockState(pos.west()).is(BlockTags.AIR)) {
 			count++;
 		}
-		if (!serverLevel.getBlockState(pos.north()).getBlockHolder().is(BlockTags.AIR)) {
+		if (!serverLevel.getBlockState(pos.north()).is(BlockTags.AIR)) {
 			count++;
 		}
-		if (!serverLevel.getBlockState(pos.south()).getBlockHolder().is(BlockTags.AIR)) {
+		if (!serverLevel.getBlockState(pos.south()).is(BlockTags.AIR)) {
 			count++;
 		}
 
@@ -2363,7 +2357,7 @@ public class MoveEntityEvent {
 		if (isOnWallRadius(ve, wallRadius, villageMeetingPlacePos)) {
 			// check for other meeting place bells blocking wall since too close.
 			Collection<PoiRecord> result = serverLevel.getPoiManager()
-					.getInSquare(t -> t == PoiTypes.MEETING, ve.blockPosition(), 41, Occupancy.ANY)
+					.getInSquare(t -> t.is(PoiTypes.MEETING), ve.blockPosition(), 41, Occupancy.ANY)
 					.collect(Collectors.toCollection(ArrayList::new));
 
 			// 08/30/20 Collection had bug with range that I couldn't resolve.
@@ -2526,7 +2520,7 @@ public class MoveEntityEvent {
 			return;
 		}
 
-		long daytime = serverLevel.getDayTime() % 24000;
+		long daytime = serverLevel.getDefaultClockTime() % 24000;
 
 		if (daytime < 9000 || daytime > 11000) {
 			return;

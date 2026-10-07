@@ -24,16 +24,12 @@ jobs:
         if: always()
         run: |
           J=$(find ~/.gradle/caches -name 'minecraft-merged-deobf-26.3.jar' | head -1)
-          { javap -cp $J net.minecraft.world.level.block.BonemealableBlock
-            javap -cp $J net.minecraft.sounds.SoundEvents | grep -E ' COW_'
-            javap -cp $J net.minecraft.server.level.ServerLevel | grep -iE 'getEntities|getDayTime|Time|Clock|getEntity|EntityGetter|getRandom'
-            javap -cp $J net.minecraft.world.level.Level | grep -iE 'DayTime|Time|Clock|getEntities|getRandom'
-            javap -cp $J net.minecraft.world.entity.ai.village.poi.PoiRecord
-            javap -cp $J net.minecraft.world.entity.npc.villager.Villager | grep -iE 'VillagerData|getVillager'
-            javap -cp $J net.minecraft.world.entity.npc.villager.VillagerData
-            javap -cp $J net.minecraft.world.entity.EntityType | grep -iE 'tryCast|spawn |spawn\(|getKey'
-            javap -cp $J net.minecraft.world.entity.Mob | grep -iE 'setBaby|setPersistence'
-            javap -cp $J net.minecraft.world.level.block.MushroomBlock | grep -i grow
+          { javap -cp $J net.minecraft.world.level.block.BonemealSource
+            javap -cp $J net.minecraft.world.entity.EntityType | grep -iE 'golem|villager'
+            javap -cp $J net.minecraft.sounds.SoundEvents | grep -iE 'GENERIC|_DEATH'
+            javap -cp $J net.minecraft.world.entity.animal.cow.CowSoundVariant
+            javap -cp $J net.minecraft.world.entity.animal.cow.CowSoundVariants
+            javap -cp $J 'net.minecraft.world.entity.animal.cow.CowSoundVariants$SoundSet'
           } 2>&1 | sed 's/^/API: /'
       - uses: actions/upload-artifact@v7
         if: success()
