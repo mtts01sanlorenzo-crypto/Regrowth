@@ -1462,7 +1462,7 @@ public class MoveEntityEvent {
 				int excess = serverLevel.getEntities(le.getType(), box, (entity) -> true).size() - 16;
 
 					if (excess > 16) {
-				serverLevel.playLocalSound(le.getX(), le.getY(), le.getZ(), SoundEvents.COW_DEATH, SoundSource.NEUTRAL,
+				serverLevel.playLocalSound(le.getX(), le.getY(), le.getZ(), SoundEvents.COW_SOUNDS.get(net.minecraft.world.entity.animal.cow.CowSoundVariants.SoundSet.CLASSIC).deathSound().value(), SoundSource.NEUTRAL,
 						1.1f, 0.54f, true);
 						le.setPos(le.getX(), -66, le.getZ());
 					} else {
@@ -2533,7 +2533,7 @@ public class MoveEntityEvent {
 			BlockPos pos = BlockPos.containing(ve.getX(), (ve.getY() + 0.99d), (ve.getZ()));
 			AABB box = AABB.encapsulatingFullBlocks(pos.east(6).above(3).north(6), pos.west(6).below(2).south(6));
 
-		List<IronGolem> l = serverLevel.getEntities(EntityType.IRON_GOLEM, box, e -> true);
+		List<IronGolem> l = serverLevel.getEntitiesOfClass(IronGolem.class, box);
 
 			for (IronGolem e : l) {
 				boolean heal = true;
