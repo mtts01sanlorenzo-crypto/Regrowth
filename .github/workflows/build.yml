@@ -24,12 +24,13 @@ jobs:
         if: always()
         run: |
           J=$(find ~/.gradle/caches -name 'minecraft-merged-deobf-26.3.jar' | head -1)
-          { javap -cp $J net.minecraft.world.level.block.BonemealSource
-            javap -cp $J net.minecraft.world.entity.EntityType | grep -iE 'golem|villager'
-            javap -cp $J net.minecraft.sounds.SoundEvents | grep -iE 'GENERIC|_DEATH'
+          rm -rf /tmp/mc && mkdir /tmp/mc && (cd /tmp/mc && unzip -q $J 'net/minecraft/*')
+          { echo "IRON_GOLEM defined in: $(grep -rl IRON_GOLEM /tmp/mc | head -5)"
+            echo "COW_DEATH referenced in: $(grep -rl COW_DEATH /tmp/mc | head -5)"
+            echo "cow classes: $(ls /tmp/mc/net/minecraft/world/entity/animal/cow)"
             javap -cp $J net.minecraft.world.entity.animal.cow.CowSoundVariant
             javap -cp $J net.minecraft.world.entity.animal.cow.CowSoundVariants
-            javap -cp $J 'net.minecraft.world.entity.animal.cow.CowSoundVariants$SoundSet'
+            javap -p -cp $J 'net.minecraft.world.entity.animal.cow.CowSoundVariants$SoundSet'
           } 2>&1 | sed 's/^/API: /'
       - uses: actions/upload-artifact@v7
         if: success()

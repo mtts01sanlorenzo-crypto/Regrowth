@@ -54,6 +54,7 @@ import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.CactusBlock;
 import net.minecraft.world.level.block.CoralBlock;
@@ -1392,7 +1393,7 @@ public class MoveEntityEvent {
 			BonemealableBlock ib = (BonemealableBlock) groundBlock;
 			try {
 				BlockState bs = serverLevel.getBlockState(bpos);
-				ib.performBonemeal(serverLevel, serverLevel.getRandom(), bpos, bs);
+				ib.performBonemeal(serverLevel, serverLevel.getRandom(), bpos, bs, BonemealSource.MOB);
 			} catch (Exception e) {
 				if (doDebug)
 				Utility.debugMsg(1, le, key + " caught grow attempt exception.");
@@ -1436,7 +1437,7 @@ public class MoveEntityEvent {
 			if (!Utility.getResourceLocationString(footBlock).contains("byg")) { // byg grass crashes when bonemealed.
 				try {
 					BonemealableBlock ib = (BonemealableBlock) footBlock;
-					ib.performBonemeal(serverLevel, serverLevel.getRandom(), ePos, serverLevel.getBlockState(ePos));
+					ib.performBonemeal(serverLevel, serverLevel.getRandom(), ePos, serverLevel.getBlockState(ePos), BonemealSource.MOB);
 					if (doDebug)
 					Utility.debugMsg(2, ePos, key + " grew and hid in tall plant.");
 					return false;
