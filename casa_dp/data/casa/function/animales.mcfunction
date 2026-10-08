@@ -1,0 +1,11 @@
+summon cow 20.5 200 85.5 {PersistenceRequired:1b}
+summon cow 22.5 200 85.5 {PersistenceRequired:1b}
+summon sheep 21.5 200 87.5 {PersistenceRequired:1b}
+summon sheep 19.5 200 86.5 {PersistenceRequired:1b}
+summon pig 10.5 200 94.5 {PersistenceRequired:1b}
+summon pig 11.5 200 95.5 {PersistenceRequired:1b}
+summon chicken 14.5 200 96.5 {PersistenceRequired:1b}
+summon chicken 9.5 200 96.5 {PersistenceRequired:1b}
+summon chicken 10.5 200 93.5 {PersistenceRequired:1b}
+summon wolf -8.5 200 89.5 {PersistenceRequired:1b}
+summon cat -12.5 201 76.5 {PersistenceRequired:1b}

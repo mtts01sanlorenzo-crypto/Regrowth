@@ -1,0 +1,15 @@
+fill -17 200 63 7 211 81 air
+fill -17 212 63 7 222 81 air
+fill -17 200 82 29 209 99 air
+fill 8 200 63 29 209 81 air
+fill -16 194 64 27 198 99 dirt
+fill -16 199 64 27 199 99 grass_block
+fill -16 194 64 6 198 80 stone_bricks
+fill -15 199 65 5 199 79 stone_bricks
+fill -8 194 80 -2 199 82 stone_bricks
+fill -6 199 83 -4 199 90 dirt_path
+fill -1 199 81 25 199 81 dirt_path
+fill 11 199 82 13 199 91 dirt_path
+fill 16 199 80 16 199 80 dirt_path
+fill 6 199 72 7 199 72 dirt_path
+fill -3 199 80 -2 199 81 dirt_path
