@@ -26,7 +26,7 @@ setblock 12 201 106 spruce_stairs[facing=west,half=bottom]
 setblock 12 201 103 spruce_trapdoor[facing=west,half=bottom,open=true]
 setblock 12 201 107 spruce_trapdoor[facing=west,half=bottom,open=true]
 setblock 11 201 105 spruce_fence
-setblock 11 202 105 spruce_pressure_plate
+setblock 11 202 105 lantern[hanging=false]
 fill 11 201 104 12 201 106 red_carpet
 setblock 10 201 101 crafting_table
 setblock 11 201 101 furnace[facing=south,lit=false]
@@ -41,8 +41,8 @@ setblock 13 201 108 spruce_stairs[facing=north,half=bottom]
 setblock 15 201 108 spruce_stairs[facing=north,half=bottom]
 setblock 13 201 106 spruce_stairs[facing=south,half=bottom]
 setblock 15 201 106 spruce_stairs[facing=south,half=bottom]
-setblock 17 201 108 orange_bed[facing=west,part=head]
-setblock 16 201 108 orange_bed[facing=west,part=foot]
+setblock 17 201 108 orange_bed[facing=east,part=head]
+setblock 16 201 108 orange_bed[facing=east,part=foot]
 setblock 18 201 108 barrel[facing=up]
 setblock 12 204 102 lantern[hanging=true]
 setblock 16 204 102 lantern[hanging=true]
