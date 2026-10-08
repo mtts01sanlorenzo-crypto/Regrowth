@@ -11,9 +11,10 @@ execute unless block 10 201 102 composter run say FAIL 1 1 2 composter
 execute unless block 10 201 105 campfire run say FAIL 1 1 5 campfire
 execute unless block 10 201 113 red_tulip run say FAIL 1 1 13 red_tulip
 execute unless block 11 201 101 furnace run say FAIL 2 1 1 furnace
+execute unless block 11 201 107 spruce_fence run say FAIL 2 1 7 spruce_fence
 execute unless block 11 201 111 oak_leaves run say FAIL 2 1 11 oak_leaves
 execute unless block 11 201 112 poppy run say FAIL 2 1 12 poppy
-execute unless block 11 202 105 lantern run say FAIL 2 2 5 lantern
+execute unless block 11 202 107 lantern run say FAIL 2 2 7 lantern
 execute unless block 11 206 101 barrel run say FAIL 2 6 1 barrel
 execute unless block 11 207 101 lantern run say FAIL 2 7 1 lantern
 execute unless block 12 201 101 smoker run say FAIL 3 1 1 smoker
