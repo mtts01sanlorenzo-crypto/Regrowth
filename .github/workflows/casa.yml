@@ -17,12 +17,9 @@ jobs:
             echo "forceload add -20 60 30 100"; sleep 15
             echo "datapack list"; sleep 2
             echo "execute positioned -15 200 65 run function casa:construir"; sleep 15
-            echo "execute if block -5 201 79 minecraft:spruce_door run say CHECK_door_ok"; sleep 1
-            echo "execute if block -14 201 66 minecraft:campfire run say CHECK_campfire_ok"
-            echo "execute if block -8 200 70 minecraft:water run say CHECK_water_dummy"
-            echo "execute if entity @e[type=minecraft:wolf] run say CHECK_wolf_ok"
-            echo "execute if entity @e[type=minecraft:cat] run say CHECK_cat_ok"
-            echo "execute if entity @e[type=minecraft:cow] run say CHECK_cow_ok"
+            echo "function casa:verify"; sleep 8
+            echo "execute if entity @e[type=minecraft:cat] run say CHECK_cat_ok"; sleep 2
+            echo "data get entity @e[type=minecraft:cat,limit=1] Pos"; sleep 2
             sleep 3
             echo stop ) | timeout 420 ./gradlew runServer --console=plain > server.log 2>&1 || true
-          grep -iE "casa|function|datapack|pack|Unknown|Expected|Incorrect|CHECK|exception|error|Failed|Executed" server.log | grep -v "server.properties" | head -120
+          grep -iE "casa|function|datapack|pack|Unknown|Expected|Incorrect|CHECK|exception|error|Failed|Executed" server.log | grep -v "server.properties" | head -200
