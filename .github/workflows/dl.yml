@@ -11,13 +11,13 @@ jobs:
         run: |
           set -eux
           git config user.name "ci"; git config user.email "ci@example.com"
-          git checkout --orphan modjars
+          git checkout --orphan modjars2
           git rm -rf . >/dev/null 2>&1 || true
           mkdir -p jars
-          curl -fSL --retry 3 -o "jars/runeforged-fabric-26.3-0.2.4.jar" "https://cdn.modrinth.com/data/Co8e7VJI/versions/r4nr7lFy/runeforged-fabric-26.3-0.2.4.jar"
-          curl -fSL --retry 3 -o "jars/mutantmonsters-v26.3.1-mc26.3.x+fabric.jar" "https://cdn.modrinth.com/data/derP0ten/versions/XNliGY5t/mutantmonsters-v26.3.1-mc26.3.x+fabric.jar"
-          curl -fSL --retry 3 -o "jars/puzzleslib-v26.3.14-mc26.3.x+fabric.jar" "https://cdn.modrinth.com/data/QAGBst4M/versions/7SSd41Tf/puzzleslib-v26.3.14-mc26.3.x+fabric.jar"
+          curl -fSL --retry 3 -o "jars/dungeons-and-taverns-6.0.2.jar" "https://cdn.modrinth.com/data/tpehi7ww/versions/WilF7nqU/dungeons-and-taverns-6.0.2.jar"
+          curl -fSL --retry 3 -o "jars/friendsandfoes-fabric-5.0.2+mc26.3.jar" "https://cdn.modrinth.com/data/POQ2i9zu/versions/pGDRqzPf/friendsandfoes-fabric-5.0.2+mc26.3.jar"
+          curl -fSL --retry 3 -o "jars/ResourcefulLib-6.0.1.jar" "https://cdn.modrinth.com/data/G1hIVOrD/versions/P6Jq77km/ResourcefulLib-6.0.1.jar"
           ls -la jars
           git add -f jars
-          git commit -m "mod jars"
-          git push -f origin modjars
+          git commit -m "mod jars 2"
+          git push -f origin modjars2
