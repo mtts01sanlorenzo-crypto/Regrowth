@@ -1,18 +1,23 @@
 name: dl-mods
 on: [push, workflow_dispatch]
+permissions:
+  contents: write
 jobs:
   dl:
     runs-on: ubuntu-24.04
     steps:
-      - name: download
+      - uses: actions/checkout@v6
+      - name: download and commit jars
         run: |
           set -eux
-          mkdir -p out
-          curl -fSL --retry 3 -o "out/runeforged-fabric-26.3-0.2.4.jar" "https://cdn.modrinth.com/data/Co8e7VJI/versions/r4nr7lFy/runeforged-fabric-26.3-0.2.4.jar"
-          curl -fSL --retry 3 -o "out/mutantmonsters-v26.3.1-mc26.3.x+fabric.jar" "https://cdn.modrinth.com/data/derP0ten/versions/XNliGY5t/mutantmonsters-v26.3.1-mc26.3.x+fabric.jar"
-          curl -fSL --retry 3 -o "out/puzzleslib-v26.3.14-mc26.3.x+fabric.jar" "https://cdn.modrinth.com/data/QAGBst4M/versions/7SSd41Tf/puzzleslib-v26.3.14-mc26.3.x+fabric.jar"
-          ls -la out
-      - uses: actions/upload-artifact@v7
-        with:
-          name: mods
-          path: out/*.jar
+          git config user.name "ci"; git config user.email "ci@example.com"
+          git checkout --orphan modjars
+          git rm -rf . >/dev/null 2>&1 || true
+          mkdir -p jars
+          curl -fSL --retry 3 -o "jars/runeforged-fabric-26.3-0.2.4.jar" "https://cdn.modrinth.com/data/Co8e7VJI/versions/r4nr7lFy/runeforged-fabric-26.3-0.2.4.jar"
+          curl -fSL --retry 3 -o "jars/mutantmonsters-v26.3.1-mc26.3.x+fabric.jar" "https://cdn.modrinth.com/data/derP0ten/versions/XNliGY5t/mutantmonsters-v26.3.1-mc26.3.x+fabric.jar"
+          curl -fSL --retry 3 -o "jars/puzzleslib-v26.3.14-mc26.3.x+fabric.jar" "https://cdn.modrinth.com/data/QAGBst4M/versions/7SSd41Tf/puzzleslib-v26.3.14-mc26.3.x+fabric.jar"
+          ls -la jars
+          git add -f jars
+          git commit -m "mod jars"
+          git push -f origin modjars
