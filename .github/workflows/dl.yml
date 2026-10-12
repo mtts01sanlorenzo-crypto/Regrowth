@@ -4,15 +4,14 @@ jobs:
   dl:
     runs-on: ubuntu-24.04
     steps:
-      - run: mkdir out && cd out
-        shell: bash
       - name: download
         run: |
-          cd out 2>/dev/null || mkdir -p out && cd out
-          curl -fSL -o runeforged-fabric-26.3-0.2.4.jar "https://cdn.modrinth.com/data/Co8e7VJI/versions/r4nr7lFy/runeforged-fabric-26.3-0.2.4.jar"
-          curl -fSL -o "mutantmonsters-v26.3.1-mc26.3.x+fabric.jar" "https://cdn.modrinth.com/data/derP0ten/versions/XNliGY5t/mutantmonsters-v26.3.1-mc26.3.x+fabric.jar"
-          curl -fSL -o "puzzleslib-v26.3.14-mc26.3.x+fabric.jar" "https://cdn.modrinth.com/data/QAGBst4M/versions/7SSd41Tf/puzzleslib-v26.3.14-mc26.3.x+fabric.jar"
-          ls -la
+          set -eux
+          mkdir -p out
+          curl -fSL --retry 3 -o "out/runeforged-fabric-26.3-0.2.4.jar" "https://cdn.modrinth.com/data/Co8e7VJI/versions/r4nr7lFy/runeforged-fabric-26.3-0.2.4.jar"
+          curl -fSL --retry 3 -o "out/mutantmonsters-v26.3.1-mc26.3.x+fabric.jar" "https://cdn.modrinth.com/data/derP0ten/versions/XNliGY5t/mutantmonsters-v26.3.1-mc26.3.x+fabric.jar"
+          curl -fSL --retry 3 -o "out/puzzleslib-v26.3.14-mc26.3.x+fabric.jar" "https://cdn.modrinth.com/data/QAGBst4M/versions/7SSd41Tf/puzzleslib-v26.3.14-mc26.3.x+fabric.jar"
+          ls -la out
       - uses: actions/upload-artifact@v7
         with:
           name: mods
